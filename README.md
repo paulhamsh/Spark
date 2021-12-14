@@ -17,7 +17,7 @@ The last bit requires a workaround because the app doesn't want to receive chang
 
 This also usese the latest SparkIO class and SparkComms and a new wrapper.   
 
-v5 has a nice UI on M5 Stack Core 2.    
+It has a nice UI on M5 Stack Core 2.    
 
 
 <p align="center">
