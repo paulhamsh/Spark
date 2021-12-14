@@ -7,6 +7,17 @@ Contains latest set of documentation on the bluetooth message format, ESP32 code
 
 All the libraries to control the Spark amp and app with an ESP 32 device.
 
+The required libraries are:   
+  SparkComms.ino  
+  SparkComms.h  
+  SparkIO.ino  
+  SparkIO.h  
+  SparkStructures.h  
+  Spark.ino  
+  Spark.h  
+  RingBuffer.ino  
+  RingBuffer.h
+
 SparkESP32.ino also manages Midi control capability for the Spark 40 Amp   
 
 Needs an ESP32 device, preferrably with USB host capability.   
