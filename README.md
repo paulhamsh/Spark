@@ -5,7 +5,9 @@ Contains latest set of documentation on the bluetooth message format, ESP32 code
 
 # SparkESP32
 
-Midi control capability for the Spark 40 Amp   
+All the libraries to control the Spark amp and app with an ESP 32 device.
+
+SparkESP32.ino also manages Midi control capability for the Spark 40 Amp   
 
 Needs an ESP32 device, preferrably with USB host capability.   
 
