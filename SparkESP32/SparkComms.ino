@@ -10,7 +10,7 @@ class MyClientCallback : public BLEClientCallbacks
   void onConnect(BLEClient *pclient)
   {
     DEBUG("callback: Spark connected");
-    set_connected(SPK);
+    set_conn_status_connected(SPK);
   }
 
   void onDisconnect(BLEClient *pclient)
@@ -19,7 +19,7 @@ class MyClientCallback : public BLEClientCallbacks
 
     connected_sp = false;         
     DEBUG("callback: Spark disconnected");   
-    set_disconnected(SPK);   
+    set_conn_status_disconnected(SPK);   
   }
 };
 
@@ -29,8 +29,7 @@ class MyServerCallback : public BLEServerCallbacks
 {
   void onConnect(BLEServer *pserver)
   {
-    ble_app_connected = true; // This is a lie
-    set_connected(APP);
+    set_conn_status_connected(APP);
     DEBUG("callback: BLE app connected");
   }
 
@@ -38,10 +37,8 @@ class MyServerCallback : public BLEServerCallbacks
   {
 
 //    if (pserver->getConnectedCount() == 1) {
-
-    ble_app_connected = false;         
     DEBUG("callback: BLE app disconnected");
-    set_disconnected(APP);
+    set_conn_status_disconnected(APP);
   }
 };
 
@@ -52,12 +49,12 @@ class MyServerCallback : public BLEServerCallbacks
 void bt_callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
   if(event == ESP_SPP_SRV_OPEN_EVT){
     DEBUG("callback: Classic BT app connected");
-        set_connected(APP);
+    //set_conn_status_connected(APP);
   }
  
   if(event == ESP_SPP_CLOSE_EVT ){
     DEBUG("callback: Classic BT app disconnected");
-    set_disconnected(APP);
+    set_conn_status_disconnected(APP);
   }
 }
 #endif
@@ -87,7 +84,7 @@ void notifyCB_pedal(BLERemoteCharacteristic* pRemoteCharacteristic, uint8_t* pDa
   }
   midi_in.commit();
 
-  set_flash(FROM, BLE_MIDI);  
+  set_conn_received(BLE_MIDI);  
 }
 #endif
 
@@ -181,19 +178,26 @@ void connect_pedal() {
         }
       }
       DEBUG("connect_pedal(): pedal connected");
-      set_connected(BLE_MIDI);
+      set_conn_status_connected(BLE_MIDI);
     }
   }
 }
 #endif
 
 void connect_to_all() {
-  int i;
+  int i, j;
   uint8_t b;
+  unsigned long t;
+
+  // set up connection status tracking array
+  t = millis();
+  for (i = 0; i < NUM_CONNS; i++) {
+    conn_status[i] = false;
+    for (j = 0; j < 3; j++)
+      conn_last_changed[j][i] = t;
+  }
 
   is_ble = true;
-  ble_app_connected = false;
-  classic_app_connected = false;
 
   BLEDevice::init("Spark 40 BLE");
   pClient_sp = BLEDevice::createClient();
@@ -310,8 +314,7 @@ bool app_available() {
 }
 
 uint8_t app_read() {
-  set_flash(FROM, APP);
-  
+  set_conn_received(APP);
   if (is_ble) {
      uint8_t b;
      ble_app_in.get(&b);
@@ -324,8 +327,7 @@ uint8_t app_read() {
 }
 
 void app_write(byte *buf, int len) {
-  set_flash(TO, APP);
-  
+  set_conn_sent(APP);
   if (is_ble) {
     pCharacteristic_send->setValue(buf, len);
     pCharacteristic_send->notify(true);
@@ -339,9 +341,8 @@ void app_write(byte *buf, int len) {
 
 
 void app_write_timed(byte *buf, int len) {               // same as app_write but with a slight delay for classic bluetooth - it seems to need it
-    set_flash(TO, APP);
-    
-    if (is_ble) {
+  set_conn_sent(APP);
+  if (is_ble) {
     pCharacteristic_send->setValue(buf, len);
     pCharacteristic_send->notify(true);
   }
@@ -358,16 +359,15 @@ bool sp_available() {
 }
 
 uint8_t sp_read() {
-  set_flash(FROM, SPK);
-  
   uint8_t b;
+  
+  set_conn_received(SPK);
   ble_in.get(&b);
   return b;
 }
 
 void sp_write(byte *buf, int len) {
-  set_flash(TO, SPK);  
-
+  set_conn_sent(SPK);  
   pSender_sp->writeValue(buf, len, false);
 }
 
@@ -378,4 +378,30 @@ int ble_getRSSI() {
 #else
   return pClient_sp->getRssi();
 #endif
+}
+
+
+// Code to enable UI changes
+
+
+void set_conn_received(int connection) {
+  conn_last_changed[FROM][connection] = millis();
+}
+
+void set_conn_sent(int connection) {
+  conn_last_changed[TO][connection] = millis();
+}
+
+void set_conn_status_connected(int connection) {
+  if (conn_status[connection] == false) {
+    conn_status[connection] = true;
+    conn_last_changed[STATUS][connection] = millis();
+  }
+}
+
+void set_conn_status_disconnected(int connection) {
+  if (conn_status[connection] == true) {
+    conn_status[connection] = false;
+    conn_last_changed[STATUS][connection] = millis();
+  }
 }

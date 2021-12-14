@@ -1,14 +1,6 @@
 #include "Screen.h"
 
-void set_connected(int conn) {
-  conn_status[conn] =  true;
-  conn_changed = true;
-}
-
-void set_disconnected(int conn) {
-  conn_status[conn] =  false;
-  conn_changed = true;
-}
+unsigned long now, last_time;
 
 void setup_screen() {
   M5.Lcd.fillScreen(TFT_BLACK);
@@ -58,30 +50,35 @@ void setup_screen() {
   M5.Lcd.print("USB MIDI");
 
   now = millis();
+  last_time = millis();
 }
 
-void set_flash(int to_from, int conn) {
-  flash[to_from][conn] = FILL_RAD;
-}
+
 
 void show_status() {
-  if (millis() - now >= 50) { 
+  int rad;
+
+  if (millis() - now > 50) { // only do this evey 50ms so we don't keep redrawing!
     now = millis();
+  
     for (int i = 0; i <= 1; i++) 
       for (int j = 0; j <= 3; j++) 
-        if (flash[i][j] >= 0) {
+        if (now - conn_last_changed[i][j] <= 900) {
+          rad = FILL_RAD - int(FILL_RAD * (now - conn_last_changed[i][j]) / 800); 
           M5.Lcd.fillCircle(i == TO ? TO_COL : FROM_COL, SPK_ICON + j * LINES_GAP, FILL_RAD, TFT_BLACK);
-          if (flash[i][j] > 0)
-            M5.Lcd.fillCircle(i == TO ? TO_COL : FROM_COL, SPK_ICON + j * LINES_GAP, flash[i][j], TFT_YELLOW);  
-          flash[i][j]--;
+          if (rad > 0)
+            M5.Lcd.fillCircle(i == TO ? TO_COL : FROM_COL, SPK_ICON + j * LINES_GAP, rad, TFT_YELLOW);  
         }
-  }
-  if (conn_changed) {
-    conn_changed = false;
+
+    
+
     for (int j = 0; j <= 2; j++) 
-      if (conn_status[j])
-        M5.Lcd.fillCircle(CON_COL, SPK_ICON + j * LINES_GAP, FILL_RAD, TFT_GREEN);
-      else
-        M5.Lcd.fillCircle(CON_COL, SPK_ICON + j * LINES_GAP, FILL_RAD, TFT_RED);
+      if (conn_last_changed[STATUS][j] >= last_time)
+        if (conn_status[j])
+          M5.Lcd.fillCircle(CON_COL, SPK_ICON + j * LINES_GAP, FILL_RAD, TFT_GREEN);
+        else
+          M5.Lcd.fillCircle(CON_COL, SPK_ICON + j * LINES_GAP, FILL_RAD, TFT_RED);
+  
+    last_time = now;
   }
 }

@@ -22,23 +22,8 @@
 #define BLE_MIDI_ICON (APP_ICON + LINES_GAP)
 #define USB_MIDI_ICON (BLE_MIDI_ICON + LINES_GAP)
 
-#define SPK 0
-#define APP 1
-#define BLE_MIDI 2
-#define USB_MIDI 3
 
-#define TO 0
-#define FROM 1
-
-unsigned long now;
-int flash[2][4] = {{FILL_RAD, FILL_RAD, FILL_RAD, FILL_RAD}, {FILL_RAD, FILL_RAD, FILL_RAD, FILL_RAD}};
-bool conn_status[4]={false, false, false, false};
-bool conn_changed = false;
-
-void set_connected(int conn);
-void set_disconnected(int conn);
 void setup_screen();
-void set_flash(int to_from, int conn);
 void show_status();
 
 #endif

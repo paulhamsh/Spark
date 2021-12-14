@@ -2,7 +2,7 @@
 
 int selected_preset;
 bool ui_update_in_progress;
-unsigned long last_time;
+
 
 
 int get_effect_index(char *str) {
