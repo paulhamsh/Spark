@@ -122,6 +122,7 @@ void connect_spark() {
 #else
     if (pClient_sp->connect(*sp_address)) {
 #endif
+      pClient_sp->setMTU(517);
       connected_sp = true;
       pService_sp = pClient_sp->getService(SpServiceUuid);
       if (pService_sp != nullptr) {
