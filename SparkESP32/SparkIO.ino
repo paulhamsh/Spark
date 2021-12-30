@@ -645,8 +645,10 @@ bool MessageIn::get_message(unsigned int *cmdsub, SparkMessage *msg, SparkPreset
       read_string(msg->str1);
       break;
     // enable / disable an effect
+    // and 0x0128 amp info command
     case 0x0315:
     case 0x0115:
+    case 0x0128:
       read_string(msg->str1);
       read_onoff(&msg->onoff);
       break;
@@ -659,6 +661,10 @@ bool MessageIn::get_message(unsigned int *cmdsub, SparkMessage *msg, SparkPreset
       read_byte(&msg->param1);
       read_byte(&msg->param2);
       break;
+    // amp info   
+    case 0x0328:
+      read_float(&msg->val);
+      break;  
     // firmware version number
     case 0x032f:
       // really this is a uint32 but it is just as easy to read into 4 uint8 - a bit of a cheat
@@ -715,7 +721,8 @@ bool MessageIn::get_message(unsigned int *cmdsub, SparkMessage *msg, SparkPreset
     case 0x0363:
       read_float(&msg->val);  
       break;
-    case 0x470:
+    case 0x0470:
+    case 0x0428:
       read_byte(&junk);
     // acks - no payload to read - no ack sent for an 0x0104
     case 0x0401:
