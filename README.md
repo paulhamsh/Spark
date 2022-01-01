@@ -34,7 +34,7 @@ It has a nice UI on M5 Stack Core 2.
 
 
 <p align="center">
-  <img src="https://github.com/paulhamsh/SparkMIDI/blob/main/image1.jpg" width="350" title="M5 Core 2">
+  <img src="https://github.com/paulhamsh/Spark/blob/main/image1.jpg" width="350" title="M5 Core 2">
 </p>
 
 
