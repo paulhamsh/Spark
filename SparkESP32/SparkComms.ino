@@ -119,10 +119,10 @@ void connect_spark() {
     
 #ifdef CLASSIC
     if (pClient_sp->connect(*sp_address, BLE_ADDR_TYPE_RANDOM)) {
+    pClient_sp->setMTU(517);
 #else
     if (pClient_sp->connect(*sp_address)) {
 #endif
-      pClient_sp->setMTU(517);
       connected_sp = true;
       pService_sp = pClient_sp->getService(SpServiceUuid);
       if (pService_sp != nullptr) {
