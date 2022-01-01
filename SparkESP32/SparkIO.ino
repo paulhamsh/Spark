@@ -724,6 +724,7 @@ bool MessageIn::get_message(unsigned int *cmdsub, SparkMessage *msg, SparkPreset
     case 0x0470:
     case 0x0428:
       read_byte(&junk);
+      break;
     // acks - no payload to read - no ack sent for an 0x0104
     case 0x0401:
     case 0x0501:
