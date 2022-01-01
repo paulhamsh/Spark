@@ -119,7 +119,11 @@ void connect_spark() {
     
 #ifdef CLASSIC
     if (pClient_sp->connect(*sp_address, BLE_ADDR_TYPE_RANDOM)) {
-    pClient_sp->setMTU(517);
+                   
+    // setMTU only works with recent ESP32 Arduino libraries (>2.0 I think)
+    // and is a fix to allow libraries >1.0.4, which the code was restricted to before.
+    // only needed also for DevKit compatible ESP32 - Heltec, M5Stack Core, M5Stack Core 2 and M5Stack Stick C do not need this
+    pClient_sp->setMTU(517);   
 #else
     if (pClient_sp->connect(*sp_address)) {
 #endif
