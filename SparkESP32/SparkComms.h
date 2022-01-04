@@ -19,8 +19,9 @@
 #define APP 1
 #define BLE_MIDI 2
 #define USB_MIDI 3
+#define SER_MIDI 4
 
-#define NUM_CONNS 4
+#define NUM_CONNS 5
 
 #define TO 0
 #define FROM 1
@@ -97,7 +98,7 @@ BLERemoteService *pService_sp;
 BLERemoteCharacteristic *pReceiver_sp;
 BLERemoteCharacteristic *pSender_sp;
 BLERemoteDescriptor* p2902_sp;
-BLEAddress *sp_address;
+BLEAdvertisedDevice *sp_device;
 
 #ifdef BT_CONTROLLER
 BLEClient *pClient_pedal;
@@ -105,7 +106,7 @@ BLERemoteService *pService_pedal;
 BLERemoteCharacteristic *pReceiver_pedal;
 BLERemoteCharacteristic *pSender_pedal;
 BLERemoteDescriptor* p2902_pedal;
-BLEAddress *pedal_address;
+BLEAdvertisedDevice *pedal_device;
 #endif
 
 RingBuffer ble_in;
