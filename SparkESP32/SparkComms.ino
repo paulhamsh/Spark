@@ -1,4 +1,3 @@
-#include "Spark.h"
 #include "SparkComms.h"
 
 const uint8_t notifyOn[] = {0x1, 0x0};
@@ -113,19 +112,13 @@ BLEUUID PedalServiceUuid(PEDAL_SERVICE);
 
 void connect_spark() {
   if (found_sp && !connected_sp) {
-
-    if (pClient_sp != nullptr && pClient_sp->isConnected())
+    if (pClient_sp != nullptr && pClient_sp->isConnected()) {
        DEBUG("HMMMM - connect_spark() SAYS I WAS CONNECTED ANYWAY");
-    
+    }
+
+    if (pClient_sp->connect(sp_device)) {    
 #ifdef CLASSIC
-    if (pClient_sp->connect(*sp_address, BLE_ADDR_TYPE_RANDOM)) {
-                   
-    // setMTU only works with recent ESP32 Arduino libraries (>2.0 I think)
-    // and is a fix to allow libraries >1.0.4, which the code was restricted to before.
-    // only needed also for DevKit compatible ESP32 - Heltec, M5Stack Core, M5Stack Core 2 and M5Stack Stick C do not need this
-    pClient_sp->setMTU(517);   
-#else
-    if (pClient_sp->connect(*sp_address)) {
+      pClient_sp->setMTU(517);
 #endif
       connected_sp = true;
       pService_sp = pClient_sp->getService(SpServiceUuid);
@@ -133,8 +126,8 @@ void connect_spark() {
         pSender_sp   = pService_sp->getCharacteristic(C_CHAR1);
         pReceiver_sp = pService_sp->getCharacteristic(C_CHAR2);
         if (pReceiver_sp && pReceiver_sp->canNotify()) {
-          pReceiver_sp->registerForNotify(notifyCB_sp);
 #ifdef CLASSIC
+          pReceiver_sp->registerForNotify(notifyCB_sp);
           p2902_sp = pReceiver_sp->getDescriptor(BLEUUID((uint16_t)0x2902));
           if (p2902_sp != nullptr)
              p2902_sp->writeValue((uint8_t*)notifyOn, 2, true);
@@ -156,11 +149,10 @@ void connect_spark() {
 #ifdef BT_CONTROLLER
 void connect_pedal() {
   if (found_pedal && !connected_pedal) {
-    //if (pClient_pedal->connect(*pedal_address, BLE_ADDR_TYPE_RANDOM)) {  // BLUEBOARD IS RANDOM
+
+    if (pClient_pedal->connect(pedal_device)) {
 #ifdef CLASSIC
-    if (pClient_pedal->connect(*pedal_address, BLE_ADDR_TYPE_PUBLIC)) {  // LPD8 SEEMS TO BE PUBLIC
-#else
-    if (pClient_pedal->connect(*pedal_address)) { 
+      pClient_sp->setMTU(517);
 #endif
       connected_pedal = true;
       pService_pedal = pClient_pedal->getService(PedalServiceUuid);
@@ -255,21 +247,24 @@ void connect_to_all() {
     
     for(i = 0; i < pResults.getCount()  && !found_sp; i++) {
       device = pResults.getDevice(i);
-
+      Serial.println(device.toString().c_str());
+      
       if (device.isAdvertisingService(SpServiceUuid)) {
         DEBUG("Found Spark");
         found_sp = true;
         connected_sp = false;
-        sp_address = new BLEAddress(device.getAddress());
+        sp_device = new BLEAdvertisedDevice(device);
       }
       
 #ifdef BT_CONTROLLER
-      if (device.isAdvertisingService(PedalServiceUuid)) {
+      if (device.isAdvertisingService(PedalServiceUuid) || strcmp(device.getName().c_str(),"iRig BlueBoard") == 0) {
         DEBUG("Found pedal");
         found_pedal = true;
         connected_pedal = false;
-        pedal_address = new BLEAddress(device.getAddress());
+        pedal_device = new BLEAdvertisedDevice(device);
       }
+
+      
 #endif
     }
   }
@@ -329,6 +324,7 @@ uint8_t app_read() {
   else
     return bt->read();
 #endif
+  return 0;  // just here to avoid compiler warning - shouldn't get to this
 }
 
 void app_write(byte *buf, int len) {
