@@ -14,7 +14,27 @@ void setup() {
 
 
 void loop() {
-  if (update_spark_state()) {
-    // do your own checks and processing here    
+  // create commands to send to the Spark amp
+  /*
+  change_amp_param(AMP_GAIN, mi3/127.0); 
+  change_amp_param(AMP_MASTER, mi3/127.0); 
+  change_drive_toggle();    
+  change_delay_toggle();  
+  change_reverb_toggle();  
+  change_hardware_preset(0);  
+  change_hardware_preset(1); 
+  change_hardware_preset(2); 
+  change_hardware_preset(3);     
+  */
+  
+  
+  if (update_spark_state()) { // this sends those commands and picks up incoming messages
+    // do your own checks and processing here to respond to the incoming messages - only one message per call of this function
+    /*
+    if (cmdsub == 0x0301) {
+      // an example - do something on message 0x0301
+    }
+    */
   }
+
 }
